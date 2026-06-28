@@ -109,6 +109,13 @@ header h1 {
   margin: 0;
 }
 
+.calc-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+}
+
 .method-field {
   display: flex;
   flex-direction: column;
@@ -121,6 +128,26 @@ header h1 {
 .method-field select {
   padding: 8px 10px;
   font-size: 0.9rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid var(--accent);
+  background: rgba(77, 159, 255, 0.12);
+  color: var(--accent);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+button:hover { background: rgba(77, 159, 255, 0.22); }
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .calc-hint {
@@ -206,6 +233,14 @@ header h1 {
   font-size: 0.9rem;
 }
 
+.btn-refresh {
+  margin-left: 0;
+  white-space: nowrap;
+  padding: 8px 14px;
+  font-size: 0.9rem;
+  align-self: flex-end;
+}
+
 .hidden { display: none !important; }
 
 .implied-taiex {
@@ -252,52 +287,6 @@ header h1 {
 }
 
 .calc-result.inv .calc-result-value { color: #f0a060; }
-
-.controls {
-  display: flex;
-  justify-content: flex-end;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 14px 18px;
-  margin-bottom: 18px;
-}
-
-.controls button {
-  margin-left: 0;
-}
-
-.toggle input { accent-color: var(--accent); }
-
-.small-input {
-  width: 72px;
-  padding: 6px 8px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--bg);
-  color: var(--text);
-}
-
-select {
-  padding: 6px 8px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--bg);
-  color: var(--text);
-}
-
-button {
-  margin-left: auto;
-  padding: 8px 14px;
-  border-radius: 8px;
-  border: 1px solid var(--accent);
-  background: rgba(77, 159, 255, 0.12);
-  color: var(--accent);
-  cursor: pointer;
-  font-weight: 600;
-}
-
-button:hover { background: rgba(77, 159, 255, 0.22); }
 
 .meta {
   color: var(--muted);
