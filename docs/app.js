@@ -18,6 +18,7 @@ const els = {
   basis: document.getElementById("basis"),
   impliedTaiexLine: document.getElementById("implied-taiex-line"),
   impliedTaiex: document.getElementById("implied-taiex"),
+  txSourceLine: document.getElementById("tx-source-line"),
   modeTabs: document.querySelectorAll(".mode-tab"),
   method: document.getElementById("method"),
   refreshBtn: document.getElementById("refresh-btn"),
@@ -105,14 +106,26 @@ function applyModeUi() {
   }
 }
 
+function applyTxDefaults() {
+  if (!data?.latest) return;
+  const params = new URLSearchParams(location.search);
+  if (data.latest.basis != null && !params.has("basis")) {
+    els.basis.value = data.latest.basis;
+  }
+}
+
 function fillLatestPrice() {
-  if (!data?.latest?.taiex) return;
-  const taiex = data.latest.taiex;
+  if (!data?.latest) return;
   if (isTxMode()) {
-    const basis = parseFloat(els.basis.value) || 0;
-    els.input.value = taiex + basis;
-  } else {
-    els.input.value = taiex;
+    if (data.latest.tx != null) {
+      els.input.value = data.latest.tx;
+      if (data.latest.basis != null) els.basis.value = data.latest.basis;
+    } else if (data.latest.taiex != null) {
+      const basis = parseFloat(els.basis.value) || 0;
+      els.input.value = data.latest.taiex + basis;
+    }
+  } else if (data.latest.taiex != null) {
+    els.input.value = data.latest.taiex;
   }
   render();
 }
@@ -141,10 +154,16 @@ function render() {
 
   if (isTxMode()) {
     els.impliedTaiex.textContent = fmt(inputTaiex);
+    if (data.latest.tx != null) {
+      els.txSourceLine.textContent = `台指期 ${fmt(data.latest.tx, 0)}（TradingView TXF1!）`;
+    } else {
+      els.txSourceLine.textContent = `台指期 ${fmt(getRawInput() ?? inputTaiex, 0)}`;
+    }
   }
 
   const updated = new Date(data.updated_at);
-  els.status.textContent = `最後更新 ${updated.toLocaleString("zh-TW")}（樣本 ${data.sample.start} ~ ${data.sample.end}）`;
+  const txNote = data.latest.tx != null ? `｜TX ${fmt(data.latest.tx, 0)}` : "";
+  els.status.textContent = `最後更新 ${updated.toLocaleString("zh-TW")}（樣本 ${data.sample.start} ~ ${data.sample.end}${txNote}）`;
 }
 
 function readUrlParams() {
@@ -167,8 +186,13 @@ async function loadData() {
   if (!data.products?.["0050"] && !data.products?.["0050反"]) {
     throw new Error("data.json 格式錯誤，請重新執行 preview.bat 更新資料");
   }
+  applyTxDefaults();
   if (!getRawInput()) {
-    els.input.value = data.latest.taiex;
+    if (isTxMode() && data.latest.tx != null) {
+      els.input.value = data.latest.tx;
+    } else if (data.latest.taiex != null) {
+      els.input.value = data.latest.taiex;
+    }
   }
   render();
 }

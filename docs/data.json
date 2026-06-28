@@ -1,12 +1,50 @@
 {
-  "updated_at": "2026-06-28T01:10:06.572996+00:00",
+  "updated_at": "2026-06-28T02:18:46.712730+00:00",
   "symbols": {
-    "taiex": "^TWII"
+    "taiex": "^TWII",
+    "tx": "TAIFEX:TXF1!"
   },
   "latest": {
     "taiex": 44571.76,
     "0050": 103.1,
-    "0050反": 10.45
+    "0050反": 10.45,
+    "tx": 44995.0,
+    "basis": 423.24
+  },
+  "tx": {
+    "symbol": "TAIFEX:TXF1!",
+    "name": "TAIEX FUTURES",
+    "price": 44995.0,
+    "close": 44995.0,
+    "lp": null,
+    "change": null,
+    "change_pct": 1.4018,
+    "open": 44900.0,
+    "high": 45922.0,
+    "low": 44135.0,
+    "volume": 68847,
+    "source": "TradingView",
+    "url": "https://www.tradingview.com/symbols/TAIFEX-TXF1!/"
+  },
+  "tx_error": null,
+  "sources": {
+    "taiex": {
+      "provider": "Yahoo Finance",
+      "symbol": "^TWII"
+    },
+    "0050": {
+      "provider": "Yahoo Finance",
+      "symbol": "0050.TW"
+    },
+    "0050反": {
+      "provider": "Yahoo Finance",
+      "symbol": "00632R.TW"
+    },
+    "tx": {
+      "provider": "TradingView",
+      "symbol": "TAIFEX:TXF1!",
+      "url": "https://www.tradingview.com/symbols/TAIFEX-TXF1!/"
+    }
   },
   "sample": {
     "start": "2026-04-20",

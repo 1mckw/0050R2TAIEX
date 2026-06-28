@@ -18,8 +18,20 @@
     </header>
 
     <section class="calc-panel">
-      <h2>價格換算</h2>
-      <p class="calc-hint">輸入 TAIEX 或台指期點位，即時推算 0050 與 0050反</p>
+      <div class="calc-header">
+        <div>
+          <h2>價格換算</h2>
+          <p class="calc-hint">輸入 TAIEX 或台指期點位，即時推算 0050 與 0050反</p>
+        </div>
+        <label class="method-field">
+          <span>方法</span>
+          <select id="method">
+            <option value="spread" selected>價差法 spread</option>
+            <option value="ratio">倍率法 ratio</option>
+            <option value="regression">迴歸法 regression</option>
+          </select>
+        </label>
+      </div>
 
       <div class="mode-tabs" role="tablist">
         <button type="button" class="mode-tab active" data-mode="taiex" role="tab">TAIEX</button>
@@ -42,6 +54,8 @@
       </div>
 
       <p class="implied-taiex hidden" id="implied-taiex-line">
+        <span id="tx-source-line">台指期 --</span>
+        <span class="arrow">→</span>
         隱含 TAIEX：<strong id="implied-taiex">--</strong>
       </p>
 
@@ -58,19 +72,11 @@
     </section>
 
     <section class="controls">
-      <label>
-        方法
-        <select id="method">
-          <option value="spread" selected>價差法 spread</option>
-          <option value="ratio">倍率法 ratio</option>
-          <option value="regression">迴歸法 regression</option>
-        </select>
-      </label>
       <button id="refresh-btn" type="button">立即更新</button>
     </section>
 
-    <p class="meta">資料來源 Yahoo Finance（^TWII、0050.TW、00632R.TW）。GitHub Actions 每 5 分鐘更新。僅供參考，非投資建議。</p>
+    <p class="meta">TAIEX / ETF：Yahoo Finance｜台指期：TradingView <a href="https://www.tradingview.com/symbols/TAIFEX-TXF1!/" target="_blank" rel="noopener">TXF1!</a>。每 5 分鐘更新。僅供參考，非投資建議。</p>
   </div>
-  <script src="app.js?v=5"></script>
+  <script src="app.js?v=7"></script>
 </body>
 </html>
