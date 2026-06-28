@@ -23,12 +23,6 @@ const els = {
   impliedTaiex: document.getElementById("implied-taiex"),
   modeTabs: document.querySelectorAll(".mode-tab"),
   method: document.getElementById("method"),
-  chartProduct: document.getElementById("chart-product"),
-  modelEtf50: document.getElementById("model-etf50"),
-  modelEtfInv: document.getElementById("model-etf-inv"),
-  scenarioTable: document.getElementById("scenario-table"),
-  chartTitle: document.getElementById("chart-title"),
-  chart: document.getElementById("chart"),
   refreshBtn: document.getElementById("refresh-btn"),
 };
 
@@ -62,7 +56,6 @@ function impliedPrice(taiex, model, method) {
 function normalizeData(raw) {
   if (raw.products) return raw;
 
-  // 相容舊版只有 0050反 的 data.json
   const inv = {
     symbol: raw.symbols?.etf || "00632R.TW",
     latest: raw.latest?.etf ?? raw.latest?.["0050反"],
@@ -117,36 +110,6 @@ function setInputMode(mode) {
   render();
 }
 
-function modelTableHtml(name, model, method) {
-  return `
-    <tr><td>方法</td><td class="num">${method}</td></tr>
-    <tr><td>參考 TAIEX</td><td class="num">${fmt(model.ref_taiex)}</td></tr>
-    <tr><td>參考 ${name}</td><td class="num">${fmt(model.ref_etf)}</td></tr>
-    <tr><td>倍率 (${name}/TAIEX)</td><td class="num">${model.ratio.toFixed(6)}</td></tr>
-    <tr><td>α</td><td class="num">${model.alpha.toFixed(4)}</td></tr>
-    <tr><td>β</td><td class="num">${model.beta.toFixed(6)}</td></tr>
-  `;
-}
-
-function renderChart(productName) {
-  const product = data.products[productName];
-  if (!product?.history?.length) {
-    els.chart.innerHTML = "<p class='meta'>無走勢資料</p>";
-    return;
-  }
-  const hist = product.history.slice(-30);
-  const maxEtf = Math.max(...hist.map((h) => h.etf));
-  const minEtf = Math.min(...hist.map((h) => h.etf));
-  const span = maxEtf - minEtf || 1;
-  els.chartTitle.textContent = `${productName} 近期走勢`;
-  els.chart.innerHTML = hist
-    .map((h) => {
-      const hPct = ((h.etf - minEtf) / span) * 100;
-      return `<div class="bar" style="height:${Math.max(hPct, 4)}%" title="${h.date}: ${h.etf}"></div>`;
-    })
-    .join("");
-}
-
 function render() {
   if (!data?.products) return;
 
@@ -161,12 +124,10 @@ function render() {
 
   if (p0050?.model) {
     els.impliedEtf50.textContent = fmt(impliedPrice(inputTaiex, p0050.model, method));
-    els.modelEtf50.innerHTML = modelTableHtml("0050", p0050.model, method);
   }
 
   if (pInv?.model) {
     els.impliedEtfInv.textContent = fmt(impliedPrice(inputTaiex, pInv.model, method));
-    els.modelEtfInv.innerHTML = modelTableHtml("0050反", pInv.model, method);
   }
 
   if (isTxMode()) {
@@ -175,22 +136,6 @@ function render() {
 
   const updated = new Date(data.updated_at);
   els.status.textContent = `最後更新 ${updated.toLocaleString("zh-TW")}（樣本 ${data.sample.start} ~ ${data.sample.end}）`;
-
-  const scenarios = p0050?.scenarios || pInv?.scenarios || [];
-  els.scenarioTable.innerHTML = scenarios
-    .map((row) => {
-      const etf50 = p0050?.model ? impliedPrice(row.taiex, p0050.model, method) : null;
-      const etfInv = pInv?.model ? impliedPrice(row.taiex, pInv.model, method) : null;
-      return `<tr>
-        <td>${row.label}</td>
-        <td class="num">${fmt(row.taiex)}</td>
-        <td class="num">${etf50 != null ? fmt(etf50) : "--"}</td>
-        <td class="num">${etfInv != null ? fmt(etfInv) : "--"}</td>
-      </tr>`;
-    })
-    .join("");
-
-  renderChart(els.chartProduct.value);
 }
 
 function readUrlParams() {
@@ -248,7 +193,6 @@ try {
     els.input.addEventListener(evt, render);
     els.basis.addEventListener(evt, render);
     els.method.addEventListener(evt, render);
-    els.chartProduct.addEventListener(evt, render);
   });
 
   els.refreshBtn.addEventListener("click", async () => {

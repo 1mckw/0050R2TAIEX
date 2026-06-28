@@ -77,49 +77,11 @@
           <option value="regression">迴歸法 regression</option>
         </select>
       </label>
-      <label>
-        圖表
-        <select id="chart-product">
-          <option value="0050">0050</option>
-          <option value="0050反" selected>0050反</option>
-        </select>
-      </label>
       <button id="refresh-btn" type="button">立即更新</button>
-    </section>
-
-    <div class="grid-2">
-      <section>
-        <h2>0050 模型參數</h2>
-        <table><tbody id="model-etf50"></tbody></table>
-      </section>
-      <section>
-        <h2>0050反 模型參數</h2>
-        <table><tbody id="model-etf-inv"></tbody></table>
-      </section>
-    </div>
-
-    <section>
-      <h2>TAIEX 情境（相對基準 ±%）</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>變動</th>
-            <th class="num">TAIEX</th>
-            <th class="num">推算 0050</th>
-            <th class="num">推算 0050反</th>
-          </tr>
-        </thead>
-        <tbody id="scenario-table"></tbody>
-      </table>
-    </section>
-
-    <section>
-      <h2 id="chart-title">0050反 近期走勢</h2>
-      <div class="chart" id="chart"></div>
     </section>
 
     <p class="meta">資料來源 Yahoo Finance（^TWII、0050.TW、00632R.TW）。GitHub Actions 每 5 分鐘更新。僅供參考，非投資建議。</p>
   </div>
-  <script src="app.js?v=2"></script>
+  <script src="app.js?v=3"></script>
 </body>
 </html>
