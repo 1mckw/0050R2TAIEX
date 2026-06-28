@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TAIEX → 0050反 即時換算</title>
+  <title>TAIEX → 0050 / 0050反 即時換算</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="wrap">
     <header>
-      <h1>TAIEX / 台指期 → 0050反</h1>
+      <h1>TAIEX / 台指期 → 0050 / 0050反</h1>
       <p class="sub">
         <span id="status">載入中…</span>
         <span class="dot">·</span>
@@ -23,8 +23,12 @@
         <div class="value" id="live-taiex">--</div>
       </div>
       <div class="card">
+        <div class="label">0050</div>
+        <div class="value" id="live-0050">--</div>
+      </div>
+      <div class="card">
         <div class="label">0050反 <small>(00632R)</small></div>
-        <div class="value" id="live-etf">--</div>
+        <div class="value" id="live-0050inv">--</div>
       </div>
       <div class="card highlight">
         <div class="label" id="input-label">輸入 TAIEX</div>
@@ -32,9 +36,16 @@
           <input id="price-input" type="number" step="0.01" placeholder="點位">
         </div>
       </div>
+    </div>
+
+    <div class="cards implied-cards">
       <div class="card result">
+        <div class="label">推算 0050</div>
+        <div class="value" id="implied-0050">--</div>
+      </div>
+      <div class="card result inv">
         <div class="label">推算 0050反</div>
-        <div class="value" id="implied">--</div>
+        <div class="value" id="implied-0050inv">--</div>
       </div>
     </div>
 
@@ -55,34 +66,48 @@
           <option value="regression">迴歸法 regression</option>
         </select>
       </label>
+      <label>
+        圖表
+        <select id="chart-product">
+          <option value="0050">0050</option>
+          <option value="0050反" selected>0050反</option>
+        </select>
+      </label>
       <button id="refresh-btn" type="button">立即更新</button>
     </section>
 
-    <section>
-      <h2>模型參數</h2>
-      <table>
-        <tbody id="model-table">
-          <tr><td colspan="2">載入中…</td></tr>
-        </tbody>
-      </table>
-    </section>
+    <div class="grid-2">
+      <section>
+        <h2>0050 模型參數</h2>
+        <table><tbody id="model-0050"></tbody></table>
+      </section>
+      <section>
+        <h2>0050反 模型參數</h2>
+        <table><tbody id="model-0050inv"></tbody></table>
+      </section>
+    </div>
 
     <section>
       <h2>TAIEX 情境（相對基準 ±%）</h2>
       <table>
         <thead>
-          <tr><th>變動</th><th class="num">TAIEX</th><th class="num">推算 0050反</th></tr>
+          <tr>
+            <th>變動</th>
+            <th class="num">TAIEX</th>
+            <th class="num">推算 0050</th>
+            <th class="num">推算 0050反</th>
+          </tr>
         </thead>
         <tbody id="scenario-table"></tbody>
       </table>
     </section>
 
     <section>
-      <h2>近期走勢</h2>
+      <h2 id="chart-title">0050反 近期走勢</h2>
       <div class="chart" id="chart"></div>
     </section>
 
-    <p class="meta">資料來源 Yahoo Finance（^TWII、00632R.TW）。GitHub Actions 每 5 分鐘更新。僅供參考，非投資建議。</p>
+    <p class="meta">資料來源 Yahoo Finance（^TWII、0050.TW、00632R.TW）。GitHub Actions 每 5 分鐘更新。僅供參考，非投資建議。</p>
   </div>
   <script src="app.js"></script>
 </body>

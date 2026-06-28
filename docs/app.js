@@ -10,15 +10,20 @@ const els = {
   status: document.getElementById("status"),
   countdown: document.getElementById("countdown"),
   liveTaiex: document.getElementById("live-taiex"),
-  liveEtf: document.getElementById("live-etf"),
+  live0050: document.getElementById("live-0050"),
+  live0050inv: document.getElementById("live-0050inv"),
   input: document.getElementById("price-input"),
-  implied: document.getElementById("implied"),
+  implied0050: document.getElementById("implied-0050"),
+  implied0050inv: document.getElementById("implied-0050inv"),
   inputLabel: document.getElementById("input-label"),
   txMode: document.getElementById("tx-mode"),
   basis: document.getElementById("basis"),
   method: document.getElementById("method"),
-  modelTable: document.getElementById("model-table"),
+  chartProduct: document.getElementById("chart-product"),
+  model0050: document.getElementById("model-0050"),
+  model0050inv: document.getElementById("model-0050inv"),
   scenarioTable: document.getElementById("scenario-table"),
+  chartTitle: document.getElementById("chart-title"),
   chart: document.getElementById("chart"),
   refreshBtn: document.getElementById("refresh-btn"),
 };
@@ -47,51 +52,66 @@ function getInputTaiex() {
   return raw;
 }
 
-function render() {
-  if (!data) return;
-
-  const method = els.method.value;
-  const model = data.model;
-  const inputTaiex = getInputTaiex();
-
-  els.liveTaiex.textContent = fmt(data.latest.taiex);
-  els.liveEtf.textContent = fmt(data.latest.etf);
-  els.implied.textContent = fmt(impliedPrice(inputTaiex, model, method));
-  els.inputLabel.textContent = els.txMode.checked ? "輸入 台指期" : "輸入 TAIEX";
-
-  const updated = new Date(data.updated_at);
-  els.status.textContent = `最後更新 ${updated.toLocaleString("zh-TW")}（樣本 ${data.sample.start} ~ ${data.sample.end}）`;
-
-  els.modelTable.innerHTML = `
+function modelTableHtml(name, model, method) {
+  return `
     <tr><td>方法</td><td class="num">${method}</td></tr>
     <tr><td>參考 TAIEX</td><td class="num">${fmt(model.ref_taiex)}</td></tr>
-    <tr><td>參考 0050反</td><td class="num">${fmt(model.ref_etf)}</td></tr>
-    <tr><td>倍率 (0050反/TAIEX)</td><td class="num">${model.ratio.toFixed(6)}</td></tr>
+    <tr><td>參考 ${name}</td><td class="num">${fmt(model.ref_etf)}</td></tr>
+    <tr><td>倍率 (${name}/TAIEX)</td><td class="num">${model.ratio.toFixed(6)}</td></tr>
     <tr><td>α</td><td class="num">${model.alpha.toFixed(4)}</td></tr>
     <tr><td>β</td><td class="num">${model.beta.toFixed(6)}</td></tr>
   `;
+}
 
-  els.scenarioTable.innerHTML = data.scenarios
-    .map((row) => {
-      const etf = impliedPrice(row.taiex, model, method);
-      return `<tr>
-        <td>${row.label}</td>
-        <td class="num">${fmt(row.taiex)}</td>
-        <td class="num">${fmt(etf)}</td>
-      </tr>`;
-    })
-    .join("");
-
-  const hist = data.history.slice(-30);
+function renderChart(productName) {
+  const hist = data.products[productName].history.slice(-30);
   const maxEtf = Math.max(...hist.map((h) => h.etf));
   const minEtf = Math.min(...hist.map((h) => h.etf));
   const span = maxEtf - minEtf || 1;
+  els.chartTitle.textContent = `${productName} 近期走勢`;
   els.chart.innerHTML = hist
     .map((h) => {
       const hPct = ((h.etf - minEtf) / span) * 100;
       return `<div class="bar" style="height:${Math.max(hPct, 4)}%" title="${h.date}: ${h.etf}"></div>`;
     })
     .join("");
+}
+
+function render() {
+  if (!data) return;
+
+  const method = els.method.value;
+  const inputTaiex = getInputTaiex();
+  const p0050 = data.products["0050"];
+  const pInv = data.products["0050反"];
+
+  els.liveTaiex.textContent = fmt(data.latest.taiex);
+  els.live0050.textContent = fmt(data.latest["0050"]);
+  els.live0050inv.textContent = fmt(data.latest["0050反"]);
+  els.implied0050.textContent = fmt(impliedPrice(inputTaiex, p0050.model, method));
+  els.implied0050inv.textContent = fmt(impliedPrice(inputTaiex, pInv.model, method));
+  els.inputLabel.textContent = els.txMode.checked ? "輸入 台指期" : "輸入 TAIEX";
+
+  const updated = new Date(data.updated_at);
+  els.status.textContent = `最後更新 ${updated.toLocaleString("zh-TW")}（樣本 ${data.sample.start} ~ ${data.sample.end}）`;
+
+  els.model0050.innerHTML = modelTableHtml("0050", p0050.model, method);
+  els.model0050inv.innerHTML = modelTableHtml("0050反", pInv.model, method);
+
+  els.scenarioTable.innerHTML = p0050.scenarios
+    .map((row, i) => {
+      const etf50 = impliedPrice(row.taiex, p0050.model, method);
+      const etfInv = impliedPrice(row.taiex, pInv.model, method);
+      return `<tr>
+        <td>${row.label}</td>
+        <td class="num">${fmt(row.taiex)}</td>
+        <td class="num">${fmt(etf50)}</td>
+        <td class="num">${fmt(etfInv)}</td>
+      </tr>`;
+    })
+    .join("");
+
+  renderChart(els.chartProduct.value);
 }
 
 async function loadData() {
@@ -130,6 +150,7 @@ function startCountdown() {
   els.txMode.addEventListener(evt, render);
   els.basis.addEventListener(evt, render);
   els.method.addEventListener(evt, render);
+  els.chartProduct.addEventListener(evt, render);
 });
 
 els.refreshBtn.addEventListener("click", async () => {

@@ -81,6 +81,19 @@ header h1 {
   outline: none;
 }
 
+.card.result.inv .value { color: #f0a060; }
+
+.implied-cards { margin-bottom: 18px; }
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.grid-2 section { margin-bottom: 0; }
+
 .controls {
   display: flex;
   flex-wrap: wrap;
