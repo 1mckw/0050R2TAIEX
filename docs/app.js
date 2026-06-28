@@ -10,9 +10,6 @@ let timer = null;
 const els = {
   status: document.getElementById("status"),
   countdown: document.getElementById("countdown"),
-  liveTaiex: document.getElementById("live-taiex"),
-  liveEtf50: document.getElementById("live-etf50"),
-  liveEtfInv: document.getElementById("live-etf-inv"),
   input: document.getElementById("price-input"),
   impliedEtf50: document.getElementById("implied-etf50"),
   impliedEtfInv: document.getElementById("implied-etf-inv"),
@@ -133,10 +130,6 @@ function render() {
   const inputTaiex = getInputTaiex();
   const p0050 = data.products["0050"];
   const pInv = data.products["0050反"];
-
-  els.liveTaiex.textContent = fmt(data.latest.taiex);
-  if (data.latest["0050"] != null) els.liveEtf50.textContent = fmt(data.latest["0050"]);
-  if (data.latest["0050反"] != null) els.liveEtfInv.textContent = fmt(data.latest["0050反"]);
 
   if (p0050?.model) {
     els.impliedEtf50.textContent = fmt(impliedPrice(inputTaiex, p0050.model, method));
