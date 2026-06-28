@@ -2,23 +2,21 @@ name: Deploy GitHub Pages
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
   schedule:
     # 台股交易時段約 UTC 01:00–06:00，週一至週五每 5 分鐘更新
     - cron: "*/5 1-6 * * 1-5"
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
   group: pages
   cancel-in-progress: false
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -35,18 +33,10 @@ jobs:
       - name: Export market data
         run: python scripts/export_data.py -o docs/data.json
 
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Deploy to gh-pages
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          path: docs
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          folder: docs
+          branch: gh-pages
+          single-commit: true
+          clean: true
