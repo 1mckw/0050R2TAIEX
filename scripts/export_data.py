@@ -14,7 +14,14 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(SCRIPTS))
 
 from taiex_to_0050 import ETF_PRODUCTS, fetch_prices, fit_regression, current_ratio, taiex_to_etf  # noqa: E402
-from tradingview_fetch import TV_TX_SYMBOL, TV_TX_URL, fetch_tx_futures  # noqa: E402
+from tradingview_fetch import (  # noqa: E402
+    TV_TAIEX_SYMBOL,
+    TV_TAIEX_URL,
+    TV_TX_SYMBOL,
+    TV_TX_URL,
+    fetch_taiex,
+    fetch_tx_futures,
+)
 
 
 def _product_payload(df, name: str) -> dict:
@@ -64,14 +71,24 @@ def _product_payload(df, name: str) -> dict:
 def export(lookback_days: int = 60) -> dict:
     df = fetch_prices(lookback_days=lookback_days)
     latest = df.iloc[-1]
-    ref_taiex = round(float(latest["taiex"]), 2)
+    yahoo_taiex = round(float(latest["taiex"]), 2)
 
+    taiex_payload = None
+    taiex_error = None
     tx_payload = None
     tx_error = None
+
+    try:
+        taiex_payload = fetch_taiex()
+    except Exception as exc:
+        taiex_error = str(exc)
+
     try:
         tx_payload = fetch_tx_futures()
     except Exception as exc:
         tx_error = str(exc)
+
+    ref_taiex = taiex_payload["price"] if taiex_payload else yahoo_taiex
 
     latest_out = {
         "taiex": ref_taiex,
@@ -86,7 +103,11 @@ def export(lookback_days: int = 60) -> dict:
     products = {name: _product_payload(df, name) for name in ETF_PRODUCTS}
 
     sources = {
-        "taiex": {"provider": "Yahoo Finance", "symbol": "^TWII"},
+        "taiex": {
+            "provider": "TradingView" if taiex_payload else "Yahoo Finance",
+            "symbol": TV_TAIEX_SYMBOL if taiex_payload else "^TWII",
+            "url": TV_TAIEX_URL if taiex_payload else None,
+        },
         "0050": {"provider": "Yahoo Finance", "symbol": "0050.TW"},
         "0050反": {"provider": "Yahoo Finance", "symbol": "00632R.TW"},
     }
@@ -99,8 +120,13 @@ def export(lookback_days: int = 60) -> dict:
 
     return {
         "updated_at": datetime.now(timezone.utc).isoformat(),
-        "symbols": {"taiex": "^TWII", "tx": TV_TX_SYMBOL},
+        "symbols": {
+            "taiex": TV_TAIEX_SYMBOL if taiex_payload else "^TWII",
+            "tx": TV_TX_SYMBOL,
+        },
         "latest": latest_out,
+        "taiex": taiex_payload,
+        "taiex_error": taiex_error,
         "tx": tx_payload,
         "tx_error": tx_error,
         "sources": sources,
@@ -127,6 +153,8 @@ def main() -> None:
     tx_part = f" | TX {lat['tx']}" if lat.get("tx") is not None else ""
     if payload.get("tx_error"):
         tx_part += f" (TX 失敗: {payload['tx_error']})"
+    if payload.get("taiex_error"):
+        tx_part += f" (TAIEX TV 失敗: {payload['taiex_error']})"
     print(f"已寫入 {out}（TAIEX {lat['taiex']}{tx_part} | 0050 {lat['0050']} | 0050反 {lat['0050反']}）")
 
 

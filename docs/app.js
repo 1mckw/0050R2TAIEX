@@ -106,6 +106,13 @@ function applyModeUi() {
   }
 }
 
+function taiexSourceLabel() {
+  if (data?.taiex?.source === "TradingView") {
+    return "TradingView TAIEX";
+  }
+  return "TAIEX";
+}
+
 function applyTxDefaults() {
   if (!data?.latest) return;
   const params = new URLSearchParams(location.search);
@@ -163,7 +170,8 @@ function render() {
 
   const updated = new Date(data.updated_at);
   const txNote = data.latest.tx != null ? `｜TX ${fmt(data.latest.tx, 0)}` : "";
-  els.status.textContent = `最後更新 ${updated.toLocaleString("zh-TW")}（樣本 ${data.sample.start} ~ ${data.sample.end}${txNote}）`;
+  const taiexNote = data.taiex?.source === "TradingView" ? "｜TAIEX TradingView" : "";
+  els.status.textContent = `最後更新 ${updated.toLocaleString("zh-TW")}（樣本 ${data.sample.start} ~ ${data.sample.end}${taiexNote}${txNote}）`;
 }
 
 function readUrlParams() {

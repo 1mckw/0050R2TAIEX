@@ -1,7 +1,7 @@
 {
-  "updated_at": "2026-06-28T02:18:46.712730+00:00",
+  "updated_at": "2026-06-28T02:27:22.395743+00:00",
   "symbols": {
-    "taiex": "^TWII",
+    "taiex": "TWSE:IX0001",
     "tx": "TAIFEX:TXF1!"
   },
   "latest": {
@@ -11,6 +11,23 @@
     "tx": 44995.0,
     "basis": 423.24
   },
+  "taiex": {
+    "symbol": "TWSE:IX0001",
+    "name": "TSEC CAPITALIZATION WEIGHTED STOCK INDEX",
+    "price": 44571.76,
+    "close": 44571.76,
+    "lp": null,
+    "change": null,
+    "change_pct": -3.6396,
+    "open": 46188.6,
+    "high": 46188.6,
+    "low": 44454.22,
+    "volume": null,
+    "source": "TradingView",
+    "display": "INDEX:TAIEX",
+    "url": "https://www.tradingview.com/symbols/INDEX-TAIEX/"
+  },
+  "taiex_error": null,
   "tx": {
     "symbol": "TAIFEX:TXF1!",
     "name": "TAIEX FUTURES",
@@ -29,8 +46,9 @@
   "tx_error": null,
   "sources": {
     "taiex": {
-      "provider": "Yahoo Finance",
-      "symbol": "^TWII"
+      "provider": "TradingView",
+      "symbol": "TWSE:IX0001",
+      "url": "https://www.tradingview.com/symbols/INDEX-TAIEX/"
     },
     "0050": {
       "provider": "Yahoo Finance",
