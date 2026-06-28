@@ -158,6 +158,27 @@ header h1 {
 
 .calc-field small { opacity: 0.75; }
 
+.calc-action {
+  flex: 0 0 auto;
+  min-width: auto;
+  justify-content: flex-end;
+}
+
+.invisible-label {
+  visibility: hidden;
+  height: 0;
+  margin: 0;
+  font-size: 0.88rem;
+}
+
+.btn-latest {
+  margin-left: 0;
+  width: 100%;
+  white-space: nowrap;
+  padding: 10px 14px;
+  font-size: 0.9rem;
+}
+
 .hidden { display: none !important; }
 
 .implied-taiex {

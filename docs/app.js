@@ -24,6 +24,7 @@ const els = {
   modeTabs: document.querySelectorAll(".mode-tab"),
   method: document.getElementById("method"),
   refreshBtn: document.getElementById("refresh-btn"),
+  latestBtn: document.getElementById("latest-btn"),
 };
 
 function assertElements() {
@@ -102,6 +103,21 @@ function applyModeUi() {
   els.input.placeholder = tx ? "例如 22100" : "例如 44500";
   els.basisWrap.classList.toggle("hidden", !tx);
   els.impliedTaiexLine.classList.toggle("hidden", !tx);
+  if (els.latestBtn) {
+    els.latestBtn.textContent = tx ? "帶入最新台指期" : "帶入最新 TAIEX";
+  }
+}
+
+function fillLatestPrice() {
+  if (!data?.latest?.taiex) return;
+  const taiex = data.latest.taiex;
+  if (isTxMode()) {
+    const basis = parseFloat(els.basis.value) || 0;
+    els.input.value = taiex + basis;
+  } else {
+    els.input.value = taiex;
+  }
+  render();
 }
 
 function setInputMode(mode) {
@@ -206,6 +222,8 @@ try {
       els.refreshBtn.disabled = false;
     }
   });
+
+  els.latestBtn.addEventListener("click", fillLatestPrice);
 
   readUrlParams();
 
