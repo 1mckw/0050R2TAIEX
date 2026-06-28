@@ -83,7 +83,122 @@ header h1 {
 
 .card.result.inv .value { color: #f0a060; }
 
-.implied-cards { margin-bottom: 18px; }
+.calc-panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 18px;
+}
+
+.calc-panel h2 {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+}
+
+.calc-hint {
+  margin: 0 0 16px;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.mode-tabs {
+  display: inline-flex;
+  gap: 6px;
+  padding: 4px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 16px;
+}
+
+.mode-tab {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  padding: 8px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.mode-tab.active {
+  background: rgba(77, 159, 255, 0.18);
+  color: var(--accent);
+}
+
+.calc-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.calc-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 160px;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.calc-field input {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 1.2rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.calc-field small { opacity: 0.75; }
+
+.hidden { display: none !important; }
+
+.implied-taiex {
+  margin: 0 0 14px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.implied-taiex strong {
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.calc-results {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.calc-result {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.calc-result-label {
+  display: block;
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+}
+
+.calc-result-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--green);
+  font-variant-numeric: tabular-nums;
+}
+
+.calc-result.inv .calc-result-value { color: #f0a060; }
 
 .grid-2 {
   display: grid;

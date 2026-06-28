@@ -3,6 +3,7 @@ const DATA_URL = "data.json";
 const IS_FILE_PROTOCOL = location.protocol === "file:";
 
 let data = null;
+let inputMode = "taiex";
 let countdown = REFRESH_SEC;
 let timer = null;
 
@@ -16,8 +17,11 @@ const els = {
   implied0050: document.getElementById("implied-0050"),
   implied0050inv: document.getElementById("implied-0050inv"),
   inputLabel: document.getElementById("input-label"),
-  txMode: document.getElementById("tx-mode"),
+  basisWrap: document.getElementById("basis-wrap"),
   basis: document.getElementById("basis"),
+  impliedTaiexLine: document.getElementById("implied-taiex-line"),
+  impliedTaiex: document.getElementById("implied-taiex"),
+  modeTabs: document.querySelectorAll(".mode-tab"),
   method: document.getElementById("method"),
   chartProduct: document.getElementById("chart-product"),
   model0050: document.getElementById("model-0050"),
@@ -35,6 +39,10 @@ function fmt(n, digits = 2) {
   });
 }
 
+function isTxMode() {
+  return inputMode === "tx";
+}
+
 function impliedPrice(taiex, model, method) {
   const { alpha, beta, ratio, ref_taiex, ref_etf } = model;
   if (method === "ratio") return taiex * ratio;
@@ -42,14 +50,36 @@ function impliedPrice(taiex, model, method) {
   return ref_etf + beta * (taiex - ref_taiex);
 }
 
-function getInputTaiex() {
+function getRawInput() {
   const raw = parseFloat(els.input.value);
-  if (Number.isNaN(raw)) return data.latest.taiex;
-  if (els.txMode.checked) {
+  return Number.isNaN(raw) ? null : raw;
+}
+
+function getInputTaiex() {
+  const raw = getRawInput();
+  if (raw === null) return data?.latest.taiex ?? 0;
+  if (isTxMode()) {
     const basis = parseFloat(els.basis.value) || 0;
     return raw - basis;
   }
   return raw;
+}
+
+function applyModeUi() {
+  const tx = isTxMode();
+  els.modeTabs.forEach((tab) => {
+    tab.classList.toggle("active", tab.dataset.mode === inputMode);
+  });
+  els.inputLabel.textContent = tx ? "台指期 價格" : "TAIEX 點位";
+  els.input.placeholder = tx ? "例如 22100" : "例如 44500";
+  els.basisWrap.classList.toggle("hidden", !tx);
+  els.impliedTaiexLine.classList.toggle("hidden", !tx);
+}
+
+function setInputMode(mode) {
+  inputMode = mode;
+  applyModeUi();
+  render();
 }
 
 function modelTableHtml(name, model, method) {
@@ -90,7 +120,10 @@ function render() {
   els.live0050inv.textContent = fmt(data.latest["0050反"]);
   els.implied0050.textContent = fmt(impliedPrice(inputTaiex, p0050.model, method));
   els.implied0050inv.textContent = fmt(impliedPrice(inputTaiex, pInv.model, method));
-  els.inputLabel.textContent = els.txMode.checked ? "輸入 台指期" : "輸入 TAIEX";
+
+  if (isTxMode()) {
+    els.impliedTaiex.textContent = fmt(inputTaiex);
+  }
 
   const updated = new Date(data.updated_at);
   els.status.textContent = `最後更新 ${updated.toLocaleString("zh-TW")}（樣本 ${data.sample.start} ~ ${data.sample.end}）`;
@@ -99,7 +132,7 @@ function render() {
   els.model0050inv.innerHTML = modelTableHtml("0050反", pInv.model, method);
 
   els.scenarioTable.innerHTML = p0050.scenarios
-    .map((row, i) => {
+    .map((row) => {
       const etf50 = impliedPrice(row.taiex, p0050.model, method);
       const etfInv = impliedPrice(row.taiex, pInv.model, method);
       return `<tr>
@@ -114,6 +147,16 @@ function render() {
   renderChart(els.chartProduct.value);
 }
 
+function readUrlParams() {
+  const params = new URLSearchParams(location.search);
+  if (params.get("mode") === "tx") inputMode = "tx";
+  const price = params.get("price");
+  const basis = params.get("basis");
+  if (price) els.input.value = price;
+  if (basis) els.basis.value = basis;
+  applyModeUi();
+}
+
 async function loadData() {
   if (IS_FILE_PROTOCOL) {
     throw new Error("請執行 preview.bat 啟動本機伺服器，不要直接開啟 HTML 檔");
@@ -121,7 +164,7 @@ async function loadData() {
   const res = await fetch(`${DATA_URL}?t=${Date.now()}`, { cache: "no-store" });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   data = await res.json();
-  if (!els.input.value) {
+  if (!getRawInput()) {
     els.input.value = data.latest.taiex;
   }
   render();
@@ -145,9 +188,12 @@ function startCountdown() {
   }, 1000);
 }
 
+els.modeTabs.forEach((tab) => {
+  tab.addEventListener("click", () => setInputMode(tab.dataset.mode));
+});
+
 ["input", "change"].forEach((evt) => {
   els.input.addEventListener(evt, render);
-  els.txMode.addEventListener(evt, render);
   els.basis.addEventListener(evt, render);
   els.method.addEventListener(evt, render);
   els.chartProduct.addEventListener(evt, render);
@@ -164,6 +210,8 @@ els.refreshBtn.addEventListener("click", async () => {
     els.refreshBtn.disabled = false;
   }
 });
+
+readUrlParams();
 
 (async () => {
   if (IS_FILE_PROTOCOL) {
