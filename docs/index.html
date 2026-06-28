@@ -44,11 +44,11 @@
       <div class="calc-results">
         <div class="calc-result">
           <span class="calc-result-label">推算 0050</span>
-          <span class="calc-result-value" id="implied-0050">--</span>
+          <span class="calc-result-value" id="implied-etf50">--</span>
         </div>
         <div class="calc-result inv">
           <span class="calc-result-label">推算 0050反</span>
-          <span class="calc-result-value" id="implied-0050inv">--</span>
+          <span class="calc-result-value" id="implied-etf-inv">--</span>
         </div>
       </div>
     </section>
@@ -60,15 +60,16 @@
       </div>
       <div class="card">
         <div class="label">0050</div>
-        <div class="value" id="live-0050">--</div>
+        <div class="value" id="live-etf50">--</div>
       </div>
       <div class="card">
         <div class="label">0050反 <small>(00632R)</small></div>
-        <div class="value" id="live-0050inv">--</div>
+        <div class="value" id="live-etf-inv">--</div>
       </div>
     </div>
 
     <section class="controls">
+      <label>
         方法
         <select id="method">
           <option value="spread" selected>價差法 spread</option>
@@ -89,11 +90,11 @@
     <div class="grid-2">
       <section>
         <h2>0050 模型參數</h2>
-        <table><tbody id="model-0050"></tbody></table>
+        <table><tbody id="model-etf50"></tbody></table>
       </section>
       <section>
         <h2>0050反 模型參數</h2>
-        <table><tbody id="model-0050inv"></tbody></table>
+        <table><tbody id="model-etf-inv"></tbody></table>
       </section>
     </div>
 
@@ -119,6 +120,6 @@
 
     <p class="meta">資料來源 Yahoo Finance（^TWII、0050.TW、00632R.TW）。GitHub Actions 每 5 分鐘更新。僅供參考，非投資建議。</p>
   </div>
-  <script src="app.js"></script>
+  <script src="app.js?v=2"></script>
 </body>
 </html>

@@ -11,11 +11,11 @@ const els = {
   status: document.getElementById("status"),
   countdown: document.getElementById("countdown"),
   liveTaiex: document.getElementById("live-taiex"),
-  live0050: document.getElementById("live-0050"),
-  live0050inv: document.getElementById("live-0050inv"),
+  liveEtf50: document.getElementById("live-etf50"),
+  liveEtfInv: document.getElementById("live-etf-inv"),
   input: document.getElementById("price-input"),
-  implied0050: document.getElementById("implied-0050"),
-  implied0050inv: document.getElementById("implied-0050inv"),
+  impliedEtf50: document.getElementById("implied-etf50"),
+  impliedEtfInv: document.getElementById("implied-etf-inv"),
   inputLabel: document.getElementById("input-label"),
   basisWrap: document.getElementById("basis-wrap"),
   basis: document.getElementById("basis"),
@@ -24,13 +24,22 @@ const els = {
   modeTabs: document.querySelectorAll(".mode-tab"),
   method: document.getElementById("method"),
   chartProduct: document.getElementById("chart-product"),
-  model0050: document.getElementById("model-0050"),
-  model0050inv: document.getElementById("model-0050inv"),
+  modelEtf50: document.getElementById("model-etf50"),
+  modelEtfInv: document.getElementById("model-etf-inv"),
   scenarioTable: document.getElementById("scenario-table"),
   chartTitle: document.getElementById("chart-title"),
   chart: document.getElementById("chart"),
   refreshBtn: document.getElementById("refresh-btn"),
 };
+
+function assertElements() {
+  const missing = Object.entries(els)
+    .filter(([key, node]) => key !== "modeTabs" && !node)
+    .map(([key]) => key);
+  if (missing.length) {
+    throw new Error(`頁面元素缺失：${missing.join(", ")}，請重新整理或清除快取`);
+  }
+}
 
 function fmt(n, digits = 2) {
   return Number(n).toLocaleString("zh-TW", {
@@ -48,6 +57,32 @@ function impliedPrice(taiex, model, method) {
   if (method === "ratio") return taiex * ratio;
   if (method === "regression") return alpha + beta * taiex;
   return ref_etf + beta * (taiex - ref_taiex);
+}
+
+function normalizeData(raw) {
+  if (raw.products) return raw;
+
+  // 相容舊版只有 0050反 的 data.json
+  const inv = {
+    symbol: raw.symbols?.etf || "00632R.TW",
+    latest: raw.latest?.etf ?? raw.latest?.["0050反"],
+    model: raw.model,
+    scenarios: raw.scenarios,
+    history: raw.history,
+  };
+
+  return {
+    ...raw,
+    latest: {
+      taiex: raw.latest.taiex,
+      "0050": raw.latest["0050"] ?? null,
+      "0050反": raw.latest.etf ?? raw.latest["0050反"],
+    },
+    products: {
+      "0050反": inv,
+      ...(raw.latest["0050"] != null ? { "0050": inv } : {}),
+    },
+  };
 }
 
 function getRawInput() {
@@ -94,7 +129,12 @@ function modelTableHtml(name, model, method) {
 }
 
 function renderChart(productName) {
-  const hist = data.products[productName].history.slice(-30);
+  const product = data.products[productName];
+  if (!product?.history?.length) {
+    els.chart.innerHTML = "<p class='meta'>無走勢資料</p>";
+    return;
+  }
+  const hist = product.history.slice(-30);
   const maxEtf = Math.max(...hist.map((h) => h.etf));
   const minEtf = Math.min(...hist.map((h) => h.etf));
   const span = maxEtf - minEtf || 1;
@@ -108,7 +148,7 @@ function renderChart(productName) {
 }
 
 function render() {
-  if (!data) return;
+  if (!data?.products) return;
 
   const method = els.method.value;
   const inputTaiex = getInputTaiex();
@@ -116,10 +156,18 @@ function render() {
   const pInv = data.products["0050反"];
 
   els.liveTaiex.textContent = fmt(data.latest.taiex);
-  els.live0050.textContent = fmt(data.latest["0050"]);
-  els.live0050inv.textContent = fmt(data.latest["0050反"]);
-  els.implied0050.textContent = fmt(impliedPrice(inputTaiex, p0050.model, method));
-  els.implied0050inv.textContent = fmt(impliedPrice(inputTaiex, pInv.model, method));
+  if (data.latest["0050"] != null) els.liveEtf50.textContent = fmt(data.latest["0050"]);
+  if (data.latest["0050反"] != null) els.liveEtfInv.textContent = fmt(data.latest["0050反"]);
+
+  if (p0050?.model) {
+    els.impliedEtf50.textContent = fmt(impliedPrice(inputTaiex, p0050.model, method));
+    els.modelEtf50.innerHTML = modelTableHtml("0050", p0050.model, method);
+  }
+
+  if (pInv?.model) {
+    els.impliedEtfInv.textContent = fmt(impliedPrice(inputTaiex, pInv.model, method));
+    els.modelEtfInv.innerHTML = modelTableHtml("0050反", pInv.model, method);
+  }
 
   if (isTxMode()) {
     els.impliedTaiex.textContent = fmt(inputTaiex);
@@ -128,18 +176,16 @@ function render() {
   const updated = new Date(data.updated_at);
   els.status.textContent = `最後更新 ${updated.toLocaleString("zh-TW")}（樣本 ${data.sample.start} ~ ${data.sample.end}）`;
 
-  els.model0050.innerHTML = modelTableHtml("0050", p0050.model, method);
-  els.model0050inv.innerHTML = modelTableHtml("0050反", pInv.model, method);
-
-  els.scenarioTable.innerHTML = p0050.scenarios
+  const scenarios = p0050?.scenarios || pInv?.scenarios || [];
+  els.scenarioTable.innerHTML = scenarios
     .map((row) => {
-      const etf50 = impliedPrice(row.taiex, p0050.model, method);
-      const etfInv = impliedPrice(row.taiex, pInv.model, method);
+      const etf50 = p0050?.model ? impliedPrice(row.taiex, p0050.model, method) : null;
+      const etfInv = pInv?.model ? impliedPrice(row.taiex, pInv.model, method) : null;
       return `<tr>
         <td>${row.label}</td>
         <td class="num">${fmt(row.taiex)}</td>
-        <td class="num">${fmt(etf50)}</td>
-        <td class="num">${fmt(etfInv)}</td>
+        <td class="num">${etf50 != null ? fmt(etf50) : "--"}</td>
+        <td class="num">${etfInv != null ? fmt(etfInv) : "--"}</td>
       </tr>`;
     })
     .join("");
@@ -163,7 +209,10 @@ async function loadData() {
   }
   const res = await fetch(`${DATA_URL}?t=${Date.now()}`, { cache: "no-store" });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  data = await res.json();
+  data = normalizeData(await res.json());
+  if (!data.products?.["0050"] && !data.products?.["0050反"]) {
+    throw new Error("data.json 格式錯誤，請重新執行 preview.bat 更新資料");
+  }
   if (!getRawInput()) {
     els.input.value = data.latest.taiex;
   }
@@ -188,42 +237,51 @@ function startCountdown() {
   }, 1000);
 }
 
-els.modeTabs.forEach((tab) => {
-  tab.addEventListener("click", () => setInputMode(tab.dataset.mode));
-});
+try {
+  assertElements();
 
-["input", "change"].forEach((evt) => {
-  els.input.addEventListener(evt, render);
-  els.basis.addEventListener(evt, render);
-  els.method.addEventListener(evt, render);
-  els.chartProduct.addEventListener(evt, render);
-});
+  els.modeTabs.forEach((tab) => {
+    tab.addEventListener("click", () => setInputMode(tab.dataset.mode));
+  });
 
-els.refreshBtn.addEventListener("click", async () => {
-  els.refreshBtn.disabled = true;
-  try {
-    await loadData();
-    startCountdown();
-  } catch (err) {
-    els.status.textContent = `更新失敗：${err.message}`;
-  } finally {
-    els.refreshBtn.disabled = false;
+  ["input", "change"].forEach((evt) => {
+    els.input.addEventListener(evt, render);
+    els.basis.addEventListener(evt, render);
+    els.method.addEventListener(evt, render);
+    els.chartProduct.addEventListener(evt, render);
+  });
+
+  els.refreshBtn.addEventListener("click", async () => {
+    els.refreshBtn.disabled = true;
+    try {
+      await loadData();
+      startCountdown();
+    } catch (err) {
+      els.status.textContent = `更新失敗：${err.message}`;
+    } finally {
+      els.refreshBtn.disabled = false;
+    }
+  });
+
+  readUrlParams();
+
+  (async () => {
+    if (IS_FILE_PROTOCOL) {
+      els.status.innerHTML =
+        '無法預覽：請回到專案資料夾，雙擊執行 <strong>preview.bat</strong>（會開啟 http://localhost:8080）';
+      els.countdown.textContent = "";
+      return;
+    }
+    try {
+      await loadData();
+      startCountdown();
+    } catch (err) {
+      els.status.textContent = `載入失敗：${err.message}`;
+      els.countdown.textContent = "";
+    }
+  })();
+} catch (err) {
+  if (els.status) {
+    els.status.textContent = `初始化失敗：${err.message}`;
   }
-});
-
-readUrlParams();
-
-(async () => {
-  if (IS_FILE_PROTOCOL) {
-    els.status.innerHTML =
-      '無法預覽：請回到專案資料夾，雙擊執行 <strong>preview.bat</strong>（會開啟 http://localhost:8080）';
-    els.countdown.textContent = "";
-    return;
-  }
-  try {
-    await loadData();
-    startCountdown();
-  } catch (err) {
-    els.status.textContent = `載入失敗：${err.message}`;
-  }
-})();
+}
