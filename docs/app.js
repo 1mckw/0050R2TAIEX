@@ -2,6 +2,8 @@ const REFRESH_SEC = 60;
 const DATA_URL = "data.json";
 const IS_FILE_PROTOCOL = location.protocol === "file:";
 
+const TX_LABEL = "TAIEX FUTURES";
+
 let data = null;
 let inputMode = "taiex";
 let countdown = REFRESH_SEC;
@@ -97,12 +99,12 @@ function applyModeUi() {
   els.modeTabs.forEach((tab) => {
     tab.classList.toggle("active", tab.dataset.mode === inputMode);
   });
-  els.inputLabel.textContent = tx ? "台指期 價格" : "TAIEX 點位";
-  els.input.placeholder = tx ? "例如 22100" : "例如 44500";
+  els.inputLabel.textContent = tx ? `${TX_LABEL} 價格` : "TAIEX 點位";
+  els.input.placeholder = tx ? "例如 44995" : "例如 44500";
   els.basisWrap.classList.toggle("hidden", !tx);
   els.impliedTaiexLine.classList.toggle("hidden", !tx);
   if (els.latestBtn) {
-    els.latestBtn.textContent = tx ? "帶入最新台指期" : "帶入最新 TAIEX";
+    els.latestBtn.textContent = tx ? `帶入最新 ${TX_LABEL}` : "帶入最新 TAIEX";
   }
 }
 
@@ -162,14 +164,14 @@ function render() {
   if (isTxMode()) {
     els.impliedTaiex.textContent = fmt(inputTaiex);
     if (data.latest.tx != null) {
-      els.txSourceLine.textContent = `台指期 ${fmt(data.latest.tx, 0)}（TradingView TXF1!）`;
+      els.txSourceLine.textContent = `${TX_LABEL} ${fmt(data.latest.tx, 0)}（TradingView TXF1!）`;
     } else {
-      els.txSourceLine.textContent = `台指期 ${fmt(getRawInput() ?? inputTaiex, 0)}`;
+      els.txSourceLine.textContent = `${TX_LABEL} ${fmt(getRawInput() ?? inputTaiex, 0)}`;
     }
   }
 
   const updated = new Date(data.updated_at);
-  const txNote = data.latest.tx != null ? `｜TX ${fmt(data.latest.tx, 0)}` : "";
+  const txNote = data.latest.tx != null ? `｜${TX_LABEL} ${fmt(data.latest.tx, 0)}` : "";
   const taiexNote = data.taiex?.source === "TradingView" ? "｜TAIEX TradingView" : "";
   els.status.textContent = `最後更新 ${updated.toLocaleString("zh-TW")}（樣本 ${data.sample.start} ~ ${data.sample.end}${taiexNote}${txNote}）`;
 }
